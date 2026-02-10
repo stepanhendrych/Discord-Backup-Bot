@@ -1,12 +1,18 @@
 FROM python:3.8.13-slim
 
-RUN apt update && \
-	apt install git -y && \
-	apt clean && \
-	rm -rf /var/lib/apt/lists/*
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
-COPY bot.py requirements.txt app/
-RUN pip install -r app/requirements.txt && \
-	rm -rf ~/.cache src
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/*
 
-CMD ["python", "app/bot.py"]
+WORKDIR /app
+
+COPY requirements.txt /app/
+RUN python -m pip install --no-cache-dir --upgrade pip \
+    && python -m pip install --no-cache-dir -r /app/requirements.txt
+
+COPY bot.py /app/
+
+CMD ["python", "/app/bot.py"]
